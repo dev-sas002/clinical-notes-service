@@ -1,0 +1,41 @@
+[project]
+name = "care-notes-api"
+version = "1.0.0"
+description = "Multi-tenant FastAPI service for care notes and their analytics."
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["project_venv", ".venv", "venv"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # import sorting
+    "B",    # bugbear
+    "UP",   # pyupgrade
+    "C4",   # comprehensions
+    "SIM",  # simplify
+    "RUF",  # ruff-specific
+]
+ignore = [
+    "B008",  # FastAPI's Depends() in defaults is the documented idiom.
+    "A002",  # `range` is part of the public query contract; renaming breaks clients.
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests reach into private helpers deliberately, and import inside functions
+# to keep fixtures independent.
+"tests/*" = ["SLF001", "E501", "PLC0415"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = [
+    "error::DeprecationWarning:app.*",
+]
+addopts = "-q --strict-markers"
