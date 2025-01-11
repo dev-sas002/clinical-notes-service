@@ -1,0 +1,38 @@
+# One command, no manual steps:
+#
+#   docker compose up --build
+#
+# The API is then on http://localhost:8160 with a seeded database.
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: care-notes-api:latest
+    container_name: care-notes-api
+    ports:
+      # Host 8160 -> container 8000.
+      - "8160:8000"
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:////data/carenotes.db
+      ENVIRONMENT: docker
+      LOG_LEVEL: INFO
+      ANALYTICS_CACHE_TTL_SECONDS: "30"
+      MAX_PAGE_SIZE: "100"
+      CORS_ALLOW_ORIGINS: "http://localhost:3000,http://localhost:5173"
+      # Seeded on first boot; subsequent boots detect the existing rows.
+      SEED_ON_START: "true"
+      SEED_NOTES: "20000"
+      SEED_TENANTS: "3"
+    volumes:
+      - carenotes_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  carenotes_data:
